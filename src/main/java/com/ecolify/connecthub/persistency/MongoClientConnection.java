@@ -8,6 +8,7 @@ import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Filters;
+import io.github.cdimascio.dotenv.Dotenv;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.json.JSONObject;
@@ -20,8 +21,8 @@ import java.util.List;
 import java.util.Random;
 
 public class MongoClientConnection {
-
-    private final String uri = "mongodb+srv://app:skrrbrryesyesyes@cluster0.vk6rilj.mongodb.net/?retryWrites=true&w=majority";
+    Dotenv dotenv = Dotenv.load();
+    private final String uri = dotenv.get("MONGODB_URI");
     private MongoClient mongoClient = MongoClients.create(this.uri);
     private MongoDatabase database = this.mongoClient.getDatabase("smartify");
     private  MongoCollection<Document> collection;
