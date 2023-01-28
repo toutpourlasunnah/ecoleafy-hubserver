@@ -23,6 +23,10 @@ public class WebAppSocketHandler extends TextWebSocketHandler  {
     public static HashMap<WebSocketSession, String> webSocketSessionManager = new HashMap<>(); // session, sub
     private MongoClientConnection mongoClientConnection = new MongoClientConnection();
 
+    /**
+     * When a client connects, add it to the list of subscribers
+     * @param session
+     */
     @Override
     public void afterConnectionEstablished(WebSocketSession session){
         System.out.println("[DEBUG] WebApp WebSocket - New Connection : " + session.getId());
@@ -95,7 +99,7 @@ public class WebAppSocketHandler extends TextWebSocketHandler  {
     }
 
     /**
-     *
+     * When a client disconnects, remove it from the list of subscribers
      * @param session
      * @param status
      */
