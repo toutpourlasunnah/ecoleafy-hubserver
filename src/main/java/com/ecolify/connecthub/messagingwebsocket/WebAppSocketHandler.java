@@ -16,6 +16,7 @@ import org.springframework.web.socket.handler.TextWebSocketHandler;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class WebAppSocketHandler extends TextWebSocketHandler  {
     public static HashMap<WebSocketSession, String> webSocketSessionManager = new HashMap<>(); // session, sub
@@ -34,6 +35,7 @@ public class WebAppSocketHandler extends TextWebSocketHandler  {
             JSONObject jsonRequest = new JSONObject(payload);
             getRoomCommand(jsonRequest, session);
             getRoomHistoryCommand(jsonRequest, session);
+            getModuleCommand(jsonRequest, session);
         } catch (JSONPointerException e){
             System.err.println("No room requested");
         } catch (JSONException e){
@@ -48,6 +50,29 @@ public class WebAppSocketHandler extends TextWebSocketHandler  {
         } catch (JSONException e){
             System.out.println("not a room command");
         }
+    }
+
+    private void getModuleCommand(JSONObject jsonObject, WebSocketSession session) throws IOException {
+        String[] listSwitchName = {"switch_1", "switch_2", "switch_3"};
+
+        for (Map.Entry<WebSocketSession, String> entry:ModuleSocketHandler.webSocketSessionManager.entrySet()) {
+            String targetRoom = jsonObject.getString("room_command");
+            if (targetRoom.equals(entry.getValue())){
+                entry.getKey().sendMessage(new TextMessage(jsonObject.toString()));
+                break;
+            }
+        }
+//        for (String switchName : listSwitchName) {
+//            try {
+//                String switchC = jsonObject.getString(switchName);
+//
+//            } catch (JSONException e){
+//                System.out.println("not a room command");
+//            }
+//        }
+
+
+
     }
 
     private void getRoomHistoryCommand(JSONObject jsonObject, WebSocketSession session){

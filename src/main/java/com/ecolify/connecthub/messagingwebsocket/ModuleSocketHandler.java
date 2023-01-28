@@ -17,13 +17,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class ModuleSocketHandler extends TextWebSocketHandler {
-    public HashMap<WebSocketSession, String> webSocketSessionManager = new HashMap<>();
+    static public HashMap<WebSocketSession, String> webSocketSessionManager = new HashMap<>();
     private MongoClientConnection mongoClientConnection = new MongoClientConnection();
 
     @Override
     public void afterConnectionEstablished(WebSocketSession session){
         try{
-            webSocketSessionManager.put(session, "");
+            ModuleSocketHandler.webSocketSessionManager.put(session, "");
         } catch (MongoException e){
             System.err.println("MONGO ERROR " + e);
         }
@@ -36,15 +36,18 @@ public class ModuleSocketHandler extends TextWebSocketHandler {
         try {
             JSONObject jsonReceived = new JSONObject(payload);
             SensorReadingRecord newReadingRecord = SensorReadingFactory.createSensorReadingRecord(jsonReceived);
-            mongoClientConnection.insertReading(jsonReceived.getString("room"), newReadingRecord);
+
+            String room = jsonReceived.getString("room");
+
+            mongoClientConnection.insertReading(room, newReadingRecord);
+            webSocketSessionManager.put(session, room);
 
             System.out.println("MODULE WS : sending back received thing");
             SensorReadingFactory.addTimeMarker(jsonReceived);
 //            session.sendMessage(new TextMessage(jsonReceived.toString()));
             JSONObject jsonTest = new JSONObject();
-            jsonTest.put("switch_1", 0.5);
+            //jsonTest.put("switch_2", 0.5);
             session.sendMessage(new TextMessage(jsonTest.toString()));
-
 
             // UPDATE EVERYONE
             sendUpdateToAppSubs(jsonReceived);
@@ -64,7 +67,7 @@ public class ModuleSocketHandler extends TextWebSocketHandler {
 
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) {
-        webSocketSessionManager.remove(session);
+        ModuleSocketHandler.webSocketSessionManager.remove(session);
     }
 
     private void sendUpdateToAppSubs(JSONObject newValue) throws IOException {
