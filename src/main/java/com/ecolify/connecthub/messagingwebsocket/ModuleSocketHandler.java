@@ -38,12 +38,18 @@ public class ModuleSocketHandler extends TextWebSocketHandler {
             SensorReadingRecord newReadingRecord = SensorReadingFactory.createSensorReadingRecord(jsonReceived);
             mongoClientConnection.insertReading(jsonReceived.getString("room"), newReadingRecord);
 
-            System.out.println("sending back received thing");
+            System.out.println("MODULE WS : sending back received thing");
             SensorReadingFactory.addTimeMarker(jsonReceived);
-            session.sendMessage(new TextMessage(jsonReceived.toString()));
+//            session.sendMessage(new TextMessage(jsonReceived.toString()));
+            JSONObject jsonTest = new JSONObject();
+            jsonTest.put("switch_1", 0.5);
+            session.sendMessage(new TextMessage(jsonTest.toString()));
+
 
             // UPDATE EVERYONE
             sendUpdateToAppSubs(jsonReceived);
+
+
 
         } catch (JSONException e){
             System.err.println("Bad Request");

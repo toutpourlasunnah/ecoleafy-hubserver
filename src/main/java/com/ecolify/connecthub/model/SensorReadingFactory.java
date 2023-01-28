@@ -32,4 +32,18 @@ public class SensorReadingFactory {
         jsonObject.put("timeTaken", timeTaken);
         return jsonObject;
     }
+
+    public static JSONObject toJSONObject(SensorReadingRecord srr){
+        JSONObject jsonObj = new JSONObject();
+        jsonObj.put("macAddress", srr.macAddress());
+        jsonObj.put("room", srr.room());
+
+        jsonObj.put("temperature", srr.temperature());
+        jsonObj.put("humidity", srr.humidity());
+        jsonObj.put("presence", srr.presence());
+
+        jsonObj.put("timeTaken", srr.timeTaken());
+
+        return jsonObj;
+    }
 }

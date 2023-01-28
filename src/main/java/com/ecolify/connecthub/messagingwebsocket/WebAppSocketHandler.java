@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONPointerException;
+import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
@@ -22,7 +23,7 @@ public class WebAppSocketHandler extends TextWebSocketHandler  {
 
     @Override
     public void afterConnectionEstablished(WebSocketSession session){
-        WebAppSocketHandler.webSocketSessionManager.put(session, "ALL");
+        WebAppSocketHandler.webSocketSessionManager.put(session, "");
     }
 
     @Override
@@ -53,19 +54,22 @@ public class WebAppSocketHandler extends TextWebSocketHandler  {
         try {
             String room_history = jsonObject.getString("room_history");
             List<SensorReadingRecord> sensorReadingRecordList = mongoClientConnection.findReadings(room_history);
-            ObjectMapper mapper = new ObjectMapper();
             for (SensorReadingRecord readingRecord: sensorReadingRecordList) {
-                String json = mapper.writeValueAsString(readingRecord);
-                session.sendMessage(new TextMessage(json));
+                session.sendMessage(new TextMessage(SensorReadingFactory.toJSONObject(readingRecord).toString()));
             }
 
         } catch (JSONException e){
-            System.out.println("not a room history command");
+            System.out.println("WEBAPP WS : not a room history command");
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @Override
+    public void afterConnectionClosed(WebSocketSession session, CloseStatus status) {
+        WebAppSocketHandler.webSocketSessionManager.remove(session);
     }
 
 }
