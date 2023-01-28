@@ -15,6 +15,9 @@ repositories {
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-websocket'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+
+	implementation 'org.json:json:20171018'
+	implementation 'org.mongodb:mongodb-driver-sync:4.8.2'
 }
 
 tasks.named('test') {
