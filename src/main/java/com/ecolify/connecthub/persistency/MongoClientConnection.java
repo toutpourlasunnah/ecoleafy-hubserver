@@ -20,6 +20,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
 
+import static com.mongodb.client.model.Sorts.descending;
+
 public class MongoClientConnection {
     Dotenv dotenv = Dotenv.load();
     private final String uri = dotenv.get("MONGODB_URI");
@@ -32,6 +34,10 @@ public class MongoClientConnection {
 
     }
 
+    /**
+     * This method is used to test the connection to the database
+     * @return
+     */
     public boolean testConfig(){
         Random r = new Random();
         double randomNumber = r.nextDouble();
@@ -52,6 +58,11 @@ public class MongoClientConnection {
         return sensorReadingRecord.equals(retrievedSRR);
     }
 
+    /**
+     * This method is used to insert a single reading into the database
+     * @param collectionName
+     * @param sensorReadingRecord
+     */
     public void insertReading(String collectionName, SensorReadingRecord sensorReadingRecord){
         MongoCollection<SensorReadingRecord> collection = database.getCollection(collectionName, SensorReadingRecord.class);
 
@@ -59,6 +70,11 @@ public class MongoClientConnection {
         collection.insertOne(sensorReadingRecord);
     }
 
+    /**
+     * This method is used to insert a list of readings into the database
+     * @param collectionName
+     * @param sensorReadingRecord
+     */
     public void insertReadings(String collectionName, List<SensorReadingRecord> sensorReadingRecord){
         MongoCollection<SensorReadingRecord> collection = database.getCollection(collectionName, SensorReadingRecord.class);
 
@@ -66,6 +82,11 @@ public class MongoClientConnection {
         collection.insertMany(sensorReadingRecord);
     }
 
+    /**
+     * This method is used to retrieve all the readings from a collection
+     * @param collectionName
+     * @return
+     */
     public List<SensorReadingRecord> findReadings(String collectionName){
         MongoCollection<SensorReadingRecord> collection = database.getCollection(collectionName, SensorReadingRecord.class);
 
@@ -78,6 +99,23 @@ public class MongoClientConnection {
         return sensorReadingRecordList;
     }
 
+    public List<SensorReadingRecord> findLast100Readings(String collectionName){
+        MongoCollection<SensorReadingRecord> collection = database.getCollection(collectionName, SensorReadingRecord.class);
+
+        // retrieve and print the records
+        List<SensorReadingRecord> sensorReadingRecordList = new ArrayList<SensorReadingRecord>();
+        collection.find().sort(descending("timeTaken")).limit(100).into(sensorReadingRecordList);
+
+        sensorReadingRecordList.forEach(System.out::println);
+
+        return sensorReadingRecordList;
+    }
+
+    /**
+     * This method is used to retrieve all the readings from a collection
+     * @param collectionName
+     * @return
+     */
     public SensorReadingRecord findReading(String collectionName, Bson filter){
         MongoCollection<SensorReadingRecord> collection = database.getCollection(collectionName, SensorReadingRecord.class);
 
