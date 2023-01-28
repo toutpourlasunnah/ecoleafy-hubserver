@@ -5,6 +5,7 @@ import com.ecolify.connecthub.model.SensorReadingRecord;
 import com.ecolify.connecthub.persistency.MongoClientConnection;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.Lists;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONPointerException;
@@ -24,6 +25,7 @@ public class WebAppSocketHandler extends TextWebSocketHandler  {
 
     @Override
     public void afterConnectionEstablished(WebSocketSession session){
+        System.out.println("[DEBUG] WebApp WebSocket - New Connection : " + session.getId());
         WebAppSocketHandler.webSocketSessionManager.put(session, "");
     }
 
@@ -33,25 +35,36 @@ public class WebAppSocketHandler extends TextWebSocketHandler  {
 
         try {
             JSONObject jsonRequest = new JSONObject(payload);
+            System.out.println("[DEBUG] WebApp WebSocket - DataReceived : " + jsonRequest.toString());
+
             getRoomCommand(jsonRequest, session);
             getRoomHistoryCommand(jsonRequest, session);
             getModuleCommand(jsonRequest, session);
         } catch (JSONPointerException e){
-            System.err.println("No room requested");
+            System.err.println("JSON Pointer error");
         } catch (JSONException e){
-            session.sendMessage(new TextMessage("BAD REQUEST"));
+            //session.sendMessage(new TextMessage("BAD REQUEST"));
         }
     }
 
+    /**
+     * Subscribe a WebSocketSession to a room
+     * @param session
+     */
     private void getRoomCommand(JSONObject jsonObject, WebSocketSession session){
         try {
             String room = jsonObject.getString("room");
             WebAppSocketHandler.webSocketSessionManager.put(session, room);
-        } catch (JSONException e){
-            System.out.println("not a room command");
-        }
+        } catch (JSONException e){}
     }
 
+
+    /**
+     * Send a command to a module
+     * @param jsonObject
+     * @param session
+     * @throws IOException
+     */
     private void getModuleCommand(JSONObject jsonObject, WebSocketSession session) throws IOException {
         String[] listSwitchName = {"switch_1", "switch_2", "switch_3"};
 
@@ -62,38 +75,33 @@ public class WebAppSocketHandler extends TextWebSocketHandler  {
                 break;
             }
         }
-//        for (String switchName : listSwitchName) {
-//            try {
-//                String switchC = jsonObject.getString(switchName);
-//
-//            } catch (JSONException e){
-//                System.out.println("not a room command");
-//            }
-//        }
-
-
-
     }
 
+    /**
+     * Send the history of a room
+     * @param jsonObject
+     * @param session
+     */
     private void getRoomHistoryCommand(JSONObject jsonObject, WebSocketSession session){
         try {
             String room_history = jsonObject.getString("room_history");
-            List<SensorReadingRecord> sensorReadingRecordList = mongoClientConnection.findReadings(room_history);
-            for (SensorReadingRecord readingRecord: sensorReadingRecordList) {
+            List<SensorReadingRecord> sensorReadingRecordList = mongoClientConnection.findLast100Readings(room_history);
+
+            for (SensorReadingRecord readingRecord: Lists.reverse(sensorReadingRecordList)) {
                 session.sendMessage(new TextMessage(SensorReadingFactory.toJSONObject(readingRecord).toString()));
             }
 
-        } catch (JSONException e){
-            System.out.println("WEBAPP WS : not a room history command");
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        } catch (JSONException e){} catch (IOException e) {}
     }
 
+    /**
+     *
+     * @param session
+     * @param status
+     */
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) {
+        System.out.println("[DEBUG] WebApp WebSocket - Lost Connection : " + session.getId());
         WebAppSocketHandler.webSocketSessionManager.remove(session);
     }
 

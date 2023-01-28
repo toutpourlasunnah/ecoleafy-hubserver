@@ -20,9 +20,14 @@ public class ModuleSocketHandler extends TextWebSocketHandler {
     static public HashMap<WebSocketSession, String> webSocketSessionManager = new HashMap<>();
     private MongoClientConnection mongoClientConnection = new MongoClientConnection();
 
+    /**
+     * When a client connects, add it to the list of subscribers
+     * @param session
+     */
     @Override
     public void afterConnectionEstablished(WebSocketSession session){
         try{
+            System.out.println("[DEBUG] Module WebSocket - New Connection : " + session.getId());
             ModuleSocketHandler.webSocketSessionManager.put(session, "");
         } catch (MongoException e){
             System.err.println("MONGO ERROR " + e);
@@ -35,24 +40,18 @@ public class ModuleSocketHandler extends TextWebSocketHandler {
         String payload = message.getPayload();
         try {
             JSONObject jsonReceived = new JSONObject(payload);
-            SensorReadingRecord newReadingRecord = SensorReadingFactory.createSensorReadingRecord(jsonReceived);
 
             String room = jsonReceived.getString("room");
 
-            mongoClientConnection.insertReading(room, newReadingRecord);
-            webSocketSessionManager.put(session, room);
+            SensorReadingRecord newReadingRecord = SensorReadingFactory.createSensorReadingRecord(jsonReceived);
 
-            System.out.println("MODULE WS : sending back received thing");
-            SensorReadingFactory.addTimeMarker(jsonReceived);
-//            session.sendMessage(new TextMessage(jsonReceived.toString()));
-            JSONObject jsonTest = new JSONObject();
-            //jsonTest.put("switch_2", 0.5);
-            session.sendMessage(new TextMessage(jsonTest.toString()));
+            // Add Reading to DB
+            manageNewReading(newReadingRecord, room, session);
+
+            System.out.println("[DEBUG] Module WebSocket - DataReceived : " + jsonReceived.toString());
 
             // UPDATE EVERYONE
             sendUpdateToAppSubs(jsonReceived);
-
-
 
         } catch (JSONException e){
             System.err.println("Bad Request");
@@ -65,11 +64,22 @@ public class ModuleSocketHandler extends TextWebSocketHandler {
 
     }
 
+    /**
+     * When a client disconnects, remove it from the list of subscribers
+     * @param session
+     * @param status
+     */
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) {
+        System.out.println("[DEBUG] Module WebSocket - Lost Connection : " + session.getId());
         ModuleSocketHandler.webSocketSessionManager.remove(session);
     }
 
+    /**
+     * Send a message to all the subscribers of a room
+     * @param newValue
+     * @throws IOException
+     */
     private void sendUpdateToAppSubs(JSONObject newValue) throws IOException {
         String roomName = newValue.getString("room");
         for (Map.Entry<WebSocketSession, String> entry: WebAppSocketHandler.webSocketSessionManager.entrySet()) {
@@ -79,8 +89,11 @@ public class ModuleSocketHandler extends TextWebSocketHandler {
                 entry.getKey().sendMessage(new TextMessage(newValue.toString()));
             }
         }
+    }
 
-
+    private void manageNewReading(SensorReadingRecord newReading, String room, WebSocketSession session) throws IOException {
+        mongoClientConnection.insertReading(room, newReading);
+        webSocketSessionManager.put(session, room);
     }
 
 
