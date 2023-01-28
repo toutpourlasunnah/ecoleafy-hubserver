@@ -19,6 +19,7 @@ dependencies {
 	implementation 'org.json:json:20171018'
 	implementation 'org.mongodb:mongodb-driver-sync:4.8.2'
 	implementation 'io.github.cdimascio:dotenv-java:2.3.2'
+	implementation("com.google.guava:guava:31.1-jre")
 }
 
 tasks.named('test') {
