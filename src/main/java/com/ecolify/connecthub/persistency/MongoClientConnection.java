@@ -94,7 +94,7 @@ public class MongoClientConnection {
         List<SensorReadingRecord> sensorReadingRecordList = new ArrayList<SensorReadingRecord>();
         collection.find().into(sensorReadingRecordList);
 
-        sensorReadingRecordList.forEach(System.out::println);
+        //sensorReadingRecordList.forEach(System.out::println);
 
         return sensorReadingRecordList;
     }
@@ -106,7 +106,7 @@ public class MongoClientConnection {
         List<SensorReadingRecord> sensorReadingRecordList = new ArrayList<SensorReadingRecord>();
         collection.find().sort(descending("timeTaken")).limit(100).into(sensorReadingRecordList);
 
-        sensorReadingRecordList.forEach(System.out::println);
+        //sensorReadingRecordList.forEach(System.out::println);
 
         return sensorReadingRecordList;
     }
