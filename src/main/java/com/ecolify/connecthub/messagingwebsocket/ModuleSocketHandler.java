@@ -51,7 +51,7 @@ public class ModuleSocketHandler extends TextWebSocketHandler {
             System.out.println("[DEBUG] Module WebSocket - DataReceived : " + jsonReceived.toString());
 
             // UPDATE EVERYONE
-            sendUpdateToAppSubs(jsonReceived);
+            sendUpdateToAppSubs(SensorReadingFactory.addTimeMarker(jsonReceived));
 
         } catch (JSONException e){
             System.err.println("Bad Request");
