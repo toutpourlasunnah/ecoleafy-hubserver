@@ -1,22 +1,18 @@
 package com.ecolify.connecthub.persistency;
 
-import com.ecolify.connecthub.model.SensorReadingFactory;
-import com.ecolify.connecthub.model.SensorReadingRecord;
+import com.ecolify.connecthub.Node.NodeReading.controller.NodeReadingFactory;
+import com.ecolify.connecthub.Node.NodeReading.model.NodeReadingRecord;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
-import com.mongodb.client.model.Filters;
 import io.github.cdimascio.dotenv.Dotenv;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.json.JSONObject;
 
-import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
 
@@ -46,40 +42,40 @@ public class MongoClientConnection {
         jsonObj.put("macAddress", "HUB_TEST");
         jsonObj.put("temperature", randomNumber);
 
-        SensorReadingRecord sensorReadingRecord = SensorReadingFactory.createSensorReadingRecord(jsonObj);
-        this.insertReading("HUB_TEST", sensorReadingRecord);
+        NodeReadingRecord nodeReadingRecord = NodeReadingFactory.createSensorReadingRecord(jsonObj);
+        this.insertReading("HUB_TEST", nodeReadingRecord);
 
         Bson filter = Filters.eq("temperature", randomNumber);
-        SensorReadingRecord retrievedSRR = this.findReading("HUB_TEST", filter);
+        NodeReadingRecord retrievedSRR = this.findReading("HUB_TEST", filter);
 
-        System.out.println("INITIAL RECORD " + sensorReadingRecord);
+        System.out.println("INITIAL RECORD " + nodeReadingRecord);
         System.out.println("FINAL RECORD " + retrievedSRR);
 
-        return sensorReadingRecord.equals(retrievedSRR);
+        return nodeReadingRecord.equals(retrievedSRR);
     }
 
     /**
      * This method is used to insert a single reading into the database
      * @param collectionName
-     * @param sensorReadingRecord
+     * @param nodeReadingRecord
      */
-    public void insertReading(String collectionName, SensorReadingRecord sensorReadingRecord){
-        MongoCollection<SensorReadingRecord> collection = database.getCollection(collectionName, SensorReadingRecord.class);
+    public void insertReading(String collectionName, NodeReadingRecord nodeReadingRecord){
+        MongoCollection<NodeReadingRecord> collection = database.getCollection(collectionName, NodeReadingRecord.class);
 
         // insert the record
-        collection.insertOne(sensorReadingRecord);
+        collection.insertOne(nodeReadingRecord);
     }
 
     /**
      * This method is used to insert a list of readings into the database
      * @param collectionName
-     * @param sensorReadingRecord
+     * @param nodeReadingRecord
      */
-    public void insertReadings(String collectionName, List<SensorReadingRecord> sensorReadingRecord){
-        MongoCollection<SensorReadingRecord> collection = database.getCollection(collectionName, SensorReadingRecord.class);
+    public void insertReadings(String collectionName, List<NodeReadingRecord> nodeReadingRecord){
+        MongoCollection<NodeReadingRecord> collection = database.getCollection(collectionName, NodeReadingRecord.class);
 
         // insert the records
-        collection.insertMany(sensorReadingRecord);
+        collection.insertMany(nodeReadingRecord);
     }
 
     /**
@@ -87,28 +83,28 @@ public class MongoClientConnection {
      * @param collectionName
      * @return
      */
-    public List<SensorReadingRecord> findReadings(String collectionName){
-        MongoCollection<SensorReadingRecord> collection = database.getCollection(collectionName, SensorReadingRecord.class);
+    public List<NodeReadingRecord> findReadings(String collectionName){
+        MongoCollection<NodeReadingRecord> collection = database.getCollection(collectionName, NodeReadingRecord.class);
 
         // retrieve and print the records
-        List<SensorReadingRecord> sensorReadingRecordList = new ArrayList<SensorReadingRecord>();
-        collection.find().into(sensorReadingRecordList);
+        List<NodeReadingRecord> nodeReadingRecordList = new ArrayList<NodeReadingRecord>();
+        collection.find().into(nodeReadingRecordList);
 
         //sensorReadingRecordList.forEach(System.out::println);
 
-        return sensorReadingRecordList;
+        return nodeReadingRecordList;
     }
 
-    public List<SensorReadingRecord> findLast100Readings(String collectionName){
-        MongoCollection<SensorReadingRecord> collection = database.getCollection(collectionName, SensorReadingRecord.class);
+    public List<NodeReadingRecord> findLast100Readings(String collectionName){
+        MongoCollection<NodeReadingRecord> collection = database.getCollection(collectionName, NodeReadingRecord.class);
 
         // retrieve and print the records
-        List<SensorReadingRecord> sensorReadingRecordList = new ArrayList<SensorReadingRecord>();
-        collection.find().sort(descending("timeTaken")).limit(100).into(sensorReadingRecordList);
+        List<NodeReadingRecord> nodeReadingRecordList = new ArrayList<NodeReadingRecord>();
+        collection.find().sort(descending("timeTaken")).limit(100).into(nodeReadingRecordList);
 
         //sensorReadingRecordList.forEach(System.out::println);
 
-        return sensorReadingRecordList;
+        return nodeReadingRecordList;
     }
 
     /**
@@ -116,15 +112,15 @@ public class MongoClientConnection {
      * @param collectionName
      * @return
      */
-    public SensorReadingRecord findReading(String collectionName, Bson filter){
-        MongoCollection<SensorReadingRecord> collection = database.getCollection(collectionName, SensorReadingRecord.class);
+    public NodeReadingRecord findReading(String collectionName, Bson filter){
+        MongoCollection<NodeReadingRecord> collection = database.getCollection(collectionName, NodeReadingRecord.class);
 
         // retrieve the records
-        List<SensorReadingRecord> sensorReadingRecordList = new ArrayList<SensorReadingRecord>();
+        List<NodeReadingRecord> nodeReadingRecordList = new ArrayList<NodeReadingRecord>();
 
-        collection.find(filter).limit(1).into(sensorReadingRecordList);
+        collection.find(filter).limit(1).into(nodeReadingRecordList);
 
-        return sensorReadingRecordList.isEmpty() ? null : sensorReadingRecordList.get(0);
+        return nodeReadingRecordList.isEmpty() ? null : nodeReadingRecordList.get(0);
     }
 
 }

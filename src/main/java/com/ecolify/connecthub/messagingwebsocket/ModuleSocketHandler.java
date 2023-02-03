@@ -1,8 +1,8 @@
 package com.ecolify.connecthub.messagingwebsocket;
 
 
-import com.ecolify.connecthub.model.SensorReadingFactory;
-import com.ecolify.connecthub.model.SensorReadingRecord;
+import com.ecolify.connecthub.Node.NodeReading.controller.NodeReadingFactory;
+import com.ecolify.connecthub.Node.NodeReading.model.NodeReadingRecord;
 import com.ecolify.connecthub.persistency.MongoClientConnection;
 import com.mongodb.MongoException;
 import org.json.JSONException;
@@ -43,7 +43,7 @@ public class ModuleSocketHandler extends TextWebSocketHandler {
 
             String room = jsonReceived.getString("room");
 
-            SensorReadingRecord newReadingRecord = SensorReadingFactory.createSensorReadingRecord(jsonReceived);
+            NodeReadingRecord newReadingRecord = NodeReadingFactory.createSensorReadingRecord(jsonReceived);
 
             // Add Reading to DB
             manageNewReading(newReadingRecord, room, session);
@@ -51,7 +51,7 @@ public class ModuleSocketHandler extends TextWebSocketHandler {
             System.out.println("[DEBUG] Module WebSocket - DataReceived : " + jsonReceived.toString());
 
             // UPDATE EVERYONE
-            sendUpdateToAppSubs(SensorReadingFactory.addTimeMarker(jsonReceived));
+            sendUpdateToAppSubs(NodeReadingFactory.addTimeMarker(jsonReceived));
 
         } catch (JSONException e){
             System.err.println("Bad Request");
@@ -91,7 +91,7 @@ public class ModuleSocketHandler extends TextWebSocketHandler {
         }
     }
 
-    private void manageNewReading(SensorReadingRecord newReading, String room, WebSocketSession session) throws IOException {
+    private void manageNewReading(NodeReadingRecord newReading, String room, WebSocketSession session) throws IOException {
         mongoClientConnection.insertReading(room, newReading);
         webSocketSessionManager.put(session, room);
     }

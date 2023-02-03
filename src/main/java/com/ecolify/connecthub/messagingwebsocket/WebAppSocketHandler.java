@@ -1,10 +1,8 @@
 package com.ecolify.connecthub.messagingwebsocket;
 
-import com.ecolify.connecthub.model.SensorReadingFactory;
-import com.ecolify.connecthub.model.SensorReadingRecord;
+import com.ecolify.connecthub.Node.NodeReading.controller.NodeReadingFactory;
+import com.ecolify.connecthub.Node.NodeReading.model.NodeReadingRecord;
 import com.ecolify.connecthub.persistency.MongoClientConnection;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -89,10 +87,10 @@ public class WebAppSocketHandler extends TextWebSocketHandler  {
     private void getRoomHistoryCommand(JSONObject jsonObject, WebSocketSession session){
         try {
             String room_history = jsonObject.getString("room_history");
-            List<SensorReadingRecord> sensorReadingRecordList = mongoClientConnection.findLast100Readings(room_history);
+            List<NodeReadingRecord> nodeReadingRecordList = mongoClientConnection.findLast100Readings(room_history);
 
-            for (SensorReadingRecord readingRecord: Lists.reverse(sensorReadingRecordList)) {
-                session.sendMessage(new TextMessage(SensorReadingFactory.toJSONObject(readingRecord).toString()));
+            for (NodeReadingRecord readingRecord: Lists.reverse(nodeReadingRecordList)) {
+                session.sendMessage(new TextMessage(NodeReadingFactory.toJSONObject(readingRecord).toString()));
             }
 
         } catch (JSONException e){} catch (IOException e) {}

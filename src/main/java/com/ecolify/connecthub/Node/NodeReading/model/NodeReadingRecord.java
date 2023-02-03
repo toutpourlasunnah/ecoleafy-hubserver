@@ -1,8 +1,8 @@
-package com.ecolify.connecthub.model;
+package com.ecolify.connecthub.Node.NodeReading.model;
 
 import java.time.LocalDateTime;
 
-public record SensorReadingRecord(
+public record NodeReadingRecord(
         String macAddress,
         String room,
         Double temperature,
