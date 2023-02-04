@@ -1,5 +1,6 @@
 package com.ecolify.connecthub.persistency;
 
+import com.ecolify.connecthub.Hub.model.HubConfigRecord;
 import com.ecolify.connecthub.Node.NodeReading.controller.NodeReadingFactory;
 import com.ecolify.connecthub.Node.NodeReading.model.NodeReadingRecord;
 import com.mongodb.client.model.Filters;
@@ -95,6 +96,13 @@ public class MongoClientConnection {
         return nodeReadingRecordList;
     }
 
+    public List<NodeReadingRecord> findReadings(String collectionName, int numberOfReadings){
+        MongoCollection<NodeReadingRecord> collection = database.getCollection(collectionName, NodeReadingRecord.class);
+        List<NodeReadingRecord> nodeReadingRecordList = new ArrayList<NodeReadingRecord>();
+        collection.find().sort(descending("time")).limit(numberOfReadings).into(nodeReadingRecordList);
+        return nodeReadingRecordList;
+    }
+
     public List<NodeReadingRecord> findLast100Readings(String collectionName){
         MongoCollection<NodeReadingRecord> collection = database.getCollection(collectionName, NodeReadingRecord.class);
 
@@ -121,6 +129,20 @@ public class MongoClientConnection {
         collection.find(filter).limit(1).into(nodeReadingRecordList);
 
         return nodeReadingRecordList.isEmpty() ? null : nodeReadingRecordList.get(0);
+    }
+
+
+    public HubConfigRecord findHubConfig(String collectionName){
+        MongoCollection<HubConfigRecord> collection = database.getCollection(collectionName, HubConfigRecord.class);
+        List<HubConfigRecord> hubConfigRecordList = new ArrayList<HubConfigRecord>();
+        collection.find().into(hubConfigRecordList);
+        return hubConfigRecordList.isEmpty() ? null : hubConfigRecordList.get(0);
+    }
+
+    public void insertHubConfig(String collectionName, HubConfigRecord hubConfigRecord){
+        MongoCollection<HubConfigRecord> collection = database.getCollection(collectionName, HubConfigRecord.class);
+        // insert the record
+        collection.insertOne(hubConfigRecord);
     }
 
 }
