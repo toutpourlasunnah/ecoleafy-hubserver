@@ -1,4 +1,6 @@
 # Ecoleafy-Hubserver
+[![Java CI with Gradle](https://github.com/toutpourlasunnah/ecoleafy-hubserver/actions/workflows/gradle.yml/badge.svg)](https://github.com/toutpourlasunnah/ecoleafy-hubserver/actions/workflows/gradle.yml)
+
 This project was our submission to the McHacks 10 Hackathon 2023. 
 See : https://devpost.com/software/ecoleafy
 
