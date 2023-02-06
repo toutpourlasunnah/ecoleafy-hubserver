@@ -31,8 +31,8 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
     
+    - uses: iamsauravsharma/create-dotenv@v1.2.2   
     - name: Simulate DotEnv file
-    - uses: iamsauravsharma/create-dotenv@v1.2.2      
       env: # env available for only this steps
         MONGO_URI: ${{ secrets.MONGO_URI }}        
         
