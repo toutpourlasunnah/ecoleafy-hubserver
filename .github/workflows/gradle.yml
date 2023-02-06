@@ -28,6 +28,11 @@ jobs:
       with:
         java-version: '17'
         distribution: 'temurin'
+      
+    - uses: iamsauravsharma/create-dotenv@v1.2.2      
+      env: # env available for only this steps
+        MONGO_URI: ${{ secrets.MONGO_URI }}        
+        
     - name: Build with Gradle
       uses: gradle/gradle-build-action@67421db6bd0bf253fb4bd25b31ebb98943c375e1
       with:
